@@ -1,0 +1,98 @@
+# General
+.DS_Store
+*.log
+*.env
+*.env.local
+*.env.development
+*.env.production
+*.env.test
+.vscode/
+.idea/
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+dist/
+build/
+*.egg-info/
+*.swp
+*.swo
+
+# Next.js
+.next/
+out/
+.cache/
+
+# Flask
+venv/
+env/
+*.venv/
+*.env/
+*.flaskenv
+instance/
+migrations/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Production
+.cache/
+.next/
+out/
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Local development
+.env.local
+.env.development
+.env.test
+.env.production
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Exclude everything in the WhiteboxTools folder except the necessary files
+/flask/WhiteboxTools/**
+!/flask/WhiteboxTools/whitebox_tools.py
+!/flask/WhiteboxTools/tools/
+!/flask/WhiteboxTools/README.md
+!/flask/WhiteboxTools/LICENSE
