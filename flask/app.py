@@ -11,6 +11,10 @@ from typing import Dict, Any, List, Tuple
 import google.generativeai as genai
 from google.generativeai import GenerativeModel
 
+from dotenv import load_dotenv  # import the dotenv loader
+load_dotenv()                   # load variables from the .env file
+
+
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
