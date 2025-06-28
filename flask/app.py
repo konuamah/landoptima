@@ -4,35 +4,136 @@ import requests
 import rasterio
 import numpy as np
 from pathlib import Path
-import whitebox
+import subprocess
 import os
 from datetime import datetime
 from typing import Dict, Any, List, Tuple
 import google.generativeai as genai
 from google.generativeai import GenerativeModel
 
-from dotenv import load_dotenv  # import the dotenv loader
-load_dotenv()                   # load variables from the .env file
-
-
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
 
-# Configuration
+# Configuration class
 class Config:
     OPENTOPO_API_URL = "https://portal.opentopography.org/API/globaldem"
     OPENTOPO_API_KEY = os.getenv('OPENTOPO_API_KEY', 'YOUR_API_KEY_HERE')
     SOILGRIDS_API_URL = "https://rest.isric.org/soilgrids/v2.0/properties/query"
     GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'YOUR_GEMINI_API_KEY')
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
+    WHITEBOX_DIR = "/whitebox/WBT"  # where it's copied inside Docker
+    WHITEBOX_BINARY = "/whitebox/WBT/whitebox_tools"  # Direct path to binary
 
-# Configure Google Gemini AI
+# Configure Gemini AI
 genai.configure(api_key=Config.GEMINI_API_KEY)
 model = GenerativeModel('gemini-1.5-flash')
 
-# WhiteboxTools setup
-wbt = whitebox.WhiteboxTools()
+# WhiteboxTools Direct Binary Interface
+class WhiteboxToolsDirect:
+    def __init__(self, binary_path: str):
+        self.binary_path = binary_path
+        self._check_binary()
+    
+    def _check_binary(self):
+        """Check if the binary exists and is executable."""
+        if not os.path.exists(self.binary_path):
+            raise FileNotFoundError(f"WhiteboxTools binary not found at: {self.binary_path}")
+        
+        if not os.access(self.binary_path, os.X_OK):
+            raise PermissionError(f"WhiteboxTools binary is not executable: {self.binary_path}")
+        
+        print(f"[DEBUG] WhiteboxTools binary found and executable: {self.binary_path}")
+    
+    def version(self):
+        """Get WhiteboxTools version."""
+        try:
+            result = subprocess.run(
+                [self.binary_path, "--version"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=30
+            )
+            if result.returncode == 0:
+                return result.stdout.strip()
+            else:
+                raise Exception(f"Version check failed: {result.stderr}")
+        except subprocess.TimeoutExpired:
+            raise Exception("Version check timed out")
+    
+    def _run_tool(self, tool_name: str, params: List[str]) -> int:
+        """Run a WhiteboxTools command with parameters."""
+        cmd = [self.binary_path, f"--run={tool_name}"] + params
+        
+        try:
+            result = subprocess.run(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=300  # 5 minute timeout
+            )
+            
+            # Log output for debugging
+            if result.stdout:
+                print(f"[DEBUG] {tool_name} STDOUT: {result.stdout}")
+            if result.stderr:
+                print(f"[DEBUG] {tool_name} STDERR: {result.stderr}")
+            
+            return result.returncode
+            
+        except subprocess.TimeoutExpired:
+            raise Exception(f"{tool_name} operation timed out")
+        except Exception as e:
+            raise Exception(f"Failed to run {tool_name}: {str(e)}")
+    
+    def slope(self, dem_file: str, output_file: str, units: str = "degrees") -> int:
+        """Calculate slope from DEM."""
+        params = [
+            f"--dem={dem_file}",
+            f"--output={output_file}",
+            f"--units={units}"
+        ]
+        return self._run_tool("Slope", params)
+    
+    def aspect(self, dem_file: str, output_file: str) -> int:
+        """Calculate aspect from DEM."""
+        params = [
+            f"--dem={dem_file}",
+            f"--output={output_file}"
+        ]
+        return self._run_tool("Aspect", params)
+    
+    def d8_pointer(self, dem_file: str, output_file: str) -> int:
+        """Calculate D8 flow direction."""
+        params = [
+            f"--dem={dem_file}",
+            f"--output={output_file}"
+        ]
+        return self._run_tool("D8Pointer", params)
+    
+    def d8_flow_accumulation(self, dem_file: str, output_file: str, pntr_file: str = None) -> int:
+        """Calculate D8 flow accumulation."""
+        params = [
+            f"--input={dem_file}",
+            f"--output={output_file}"
+        ]
+        if pntr_file:
+            params.append(f"--pntr={pntr_file}")
+        
+        return self._run_tool("D8FlowAccumulation", params)
+
+# Initialize WhiteboxTools with direct binary access
+print(f"[DEBUG] Using WhiteboxTools directory: {Config.WHITEBOX_DIR}")
+print(f"[DEBUG] Using WhiteboxTools binary: {Config.WHITEBOX_BINARY}")
+
+try:
+    wbt = WhiteboxToolsDirect(Config.WHITEBOX_BINARY)
+    print("[DEBUG] WhiteboxTools version:", wbt.version())
+except Exception as e:
+    print(f"[ERROR] Failed to initialize WhiteboxTools: {e}")
+    raise
 
 # Utility Functions
 class Utils:
@@ -103,7 +204,7 @@ class TerrainAnalyzer:
             aspect_file = Utils.safe_file_path(project_name, "aspect")
             result = wbt.aspect(dem_file, str(aspect_file))
             if result != 0:
-                raise Exception(wbt.get_last_return())
+                raise Exception(f"Aspect calculation failed with status code: {result}")
             return str(aspect_file)
         except Exception as e:
             raise Exception(f"Aspect calculation failed: {str(e)}")
@@ -115,12 +216,12 @@ class TerrainAnalyzer:
             flow_dir_file = Utils.safe_file_path(project_name, "flowdir")
             result = wbt.d8_pointer(dem_file, str(flow_dir_file))
             if result != 0:
-                raise Exception(wbt.get_last_return())
+                raise Exception(f"Flow direction calculation failed with status code: {result}")
 
             flow_acc_file = Utils.safe_file_path(project_name, "flowacc")
-            result = wbt.d8_flow_accumulation(dem_file, str(flow_acc_file))
+            result = wbt.d8_flow_accumulation(dem_file, str(flow_acc_file), str(flow_dir_file))
             if result != 0:
-                raise Exception(wbt.get_last_return())
+                raise Exception(f"Flow accumulation calculation failed with status code: {result}")
             
             return str(flow_acc_file)
         except Exception as e:
@@ -360,6 +461,7 @@ class LandAnalysisInterpreter:
         **Overall:**
         The land shows strong characteristics for a variety of uses. The gentle slope, low environmental risks, and moderate soil characteristics suggest suitability for agriculture, residential development, or light industrial applications. However, further investigation, including a detailed soil survey and potential geotechnical analysis, would be recommended before any significant development plans are finalized. Specifically, the exact size of the parcel and its location will affect how these characteristics impact its usability and value.
         """
+
 # Flask Route
 @app.route("/analyze-land", methods=["POST"])
 def analyze_land():
@@ -465,264 +567,6 @@ def analyze_land():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    # Add this to your Flask app (app.py) to test WhiteboxTools functionality
-
-@app.route("/test-whitebox", methods=["GET"])
-def test_whitebox():
-    """Test WhiteboxTools installation and basic functionality."""
-    try:
-        import whitebox
-        import numpy as np
-        import rasterio
-        from rasterio.transform import from_bounds
-        import tempfile
-        import os
-        
-        # Initialize WhiteboxTools
-        wbt = whitebox.WhiteboxTools()
-        
-        # Get WhiteboxTools version and info
-        version_info = {
-            "whitebox_version": wbt.version(),
-            "tool_count": len(wbt.list_tools()),
-            "exe_path": wbt.exe_path,
-            "work_dir": wbt.work_dir,
-            "verbose": wbt.verbose
-        }
-        
-        # Create a simple test DEM in memory
-        width, height = 100, 100
-        bounds = (-1, -1, 1, 1)  # Simple bounds
-        transform = from_bounds(*bounds, width, height)
-        
-        # Create synthetic elevation data (a simple hill)
-        x = np.linspace(-1, 1, width)
-        y = np.linspace(-1, 1, height)
-        X, Y = np.meshgrid(x, y)
-        elevation = 100 * np.exp(-(X**2 + Y**2))  # Gaussian hill
-        
-        # Create temporary files
-        with tempfile.TemporaryDirectory() as temp_dir:
-            # Input DEM file
-            dem_path = os.path.join(temp_dir, "test_dem.tif")
-            slope_path = os.path.join(temp_dir, "test_slope.tif")
-            aspect_path = os.path.join(temp_dir, "test_aspect.tif")
-            
-            # Write test DEM
-            with rasterio.open(
-                dem_path, 'w',
-                driver='GTiff',
-                height=height,
-                width=width,
-                count=1,
-                dtype=rasterio.float32,
-                crs='EPSG:4326',
-                transform=transform
-            ) as dst:
-                dst.write(elevation.astype(rasterio.float32), 1)
-            
-            # Test slope calculation
-            slope_result = wbt.slope(dem_path, slope_path, units="degrees")
-            slope_success = slope_result == 0 and os.path.exists(slope_path)
-            
-            # Test aspect calculation
-            aspect_result = wbt.aspect(dem_path, aspect_path)
-            aspect_success = aspect_result == 0 and os.path.exists(aspect_path)
-            
-            # Read results to verify they contain data
-            slope_stats = None
-            aspect_stats = None
-            
-            if slope_success:
-                with rasterio.open(slope_path) as src:
-                    slope_data = src.read(1)
-                    slope_stats = {
-                        "min": float(np.nanmin(slope_data)),
-                        "max": float(np.nanmax(slope_data)),
-                        "mean": float(np.nanmean(slope_data)),
-                        "shape": slope_data.shape
-                    }
-            
-            if aspect_success:
-                with rasterio.open(aspect_path) as src:
-                    aspect_data = src.read(1)
-                    aspect_stats = {
-                        "min": float(np.nanmin(aspect_data)),
-                        "max": float(np.nanmax(aspect_data)),
-                        "mean": float(np.nanmean(aspect_data)),
-                        "shape": aspect_data.shape
-                    }
-        
-        # Test some basic tools availability
-        available_tools = []
-        test_tools = ['slope', 'aspect', 'd8_pointer', 'd8_flow_accumulation', 'watershed']
-        for tool in test_tools:
-            if hasattr(wbt, tool):
-                available_tools.append(tool)
-        
-        return jsonify({
-            "status": "success",
-            "message": "WhiteboxTools is working properly!",
-            "version_info": version_info,
-            "test_results": {
-                "slope_calculation": {
-                    "success": slope_success,
-                    "return_code": slope_result,
-                    "stats": slope_stats
-                },
-                "aspect_calculation": {
-                    "success": aspect_success,
-                    "return_code": aspect_result,
-                    "stats": aspect_stats
-                }
-            },
-            "available_tools": available_tools,
-            "total_available_tools": len(available_tools)
-        }), 200
-        
-    except ImportError as e:
-        return jsonify({
-            "status": "error",
-            "message": f"WhiteboxTools import failed: {str(e)}",
-            "error_type": "ImportError"
-        }), 500
-    except Exception as e:
-        return jsonify({
-            "status": "error",
-            "message": f"WhiteboxTools test failed: {str(e)}",
-            "error_type": type(e).__name__
-        }), 500
-
-
-@app.route("/whitebox-info", methods=["GET"])
-def whitebox_info():
-    """Get detailed information about WhiteboxTools installation."""
-    try:
-        import whitebox
-        import os
-        import subprocess
-        
-        wbt = whitebox.WhiteboxTools()
-        
-        # Get system information
-        system_info = {
-            "python_version": os.sys.version,
-            "whitebox_module_path": whitebox.__file__,
-            "exe_path": wbt.exe_path,
-            "exe_exists": os.path.exists(wbt.exe_path) if wbt.exe_path else False,
-            "work_dir": wbt.work_dir,
-            "work_dir_exists": os.path.exists(wbt.work_dir) if wbt.work_dir else False
-        }
-        
-        # Try to run whitebox_tools directly
-        try:
-            if system_info["exe_exists"]:
-                result = subprocess.run([wbt.exe_path, "--version"], 
-                                      capture_output=True, text=True, timeout=10)
-                system_info["direct_execution"] = {
-                    "success": result.returncode == 0,
-                    "stdout": result.stdout,
-                    "stderr": result.stderr,
-                    "return_code": result.returncode
-                }
-            else:
-                system_info["direct_execution"] = {
-                    "success": False,
-                    "error": "Executable not found"
-                }
-        except Exception as e:
-            system_info["direct_execution"] = {
-                "success": False,
-                "error": str(e)
-            }
-        
-        # List some common tools
-        common_tools = ['slope', 'aspect', 'd8_pointer', 'd8_flow_accumulation', 
-                       'watershed', 'fill_depressions', 'breach_depressions']
-        tool_status = {}
-        
-        for tool in common_tools:
-            tool_status[tool] = hasattr(wbt, tool)
-        
-        return jsonify({
-            "status": "success",
-            "system_info": system_info,
-            "tool_status": tool_status,
-            "version": wbt.version() if hasattr(wbt, 'version') else "Unknown"
-        }), 200
-        
-    except Exception as e:
-        return jsonify({
-            "status": "error",
-            "message": str(e),
-            "error_type": type(e).__name__
-        }), 500
-
-
-@app.route("/test-dependencies", methods=["GET"])
-def test_dependencies():
-    """Test all major dependencies used in the land analysis."""
-    results = {}
     
-    # Test imports
-    dependencies = [
-        'flask', 'flask_cors', 'requests', 'rasterio', 'numpy', 
-        'pathlib', 'whitebox', 'os', 'datetime', 'typing', 
-        'google.generativeai', 'dotenv'
-    ]
-    
-    for dep in dependencies:
-        try:
-            __import__(dep)
-            results[dep] = {"status": "success", "available": True}
-        except ImportError as e:
-            results[dep] = {"status": "error", "available": False, "error": str(e)}
-    
-    # Test GDAL/rasterio functionality
-    try:
-        import rasterio
-        import numpy as np
-        from rasterio.transform import from_bounds
-        
-        # Create a small test raster in memory
-        data = np.random.rand(10, 10).astype(np.float32)
-        transform = from_bounds(0, 0, 1, 1, 10, 10)
-        
-        with rasterio.MemoryFile() as memfile:
-            with memfile.open(
-                driver='GTiff',
-                height=10, width=10, count=1,
-                dtype=rasterio.float32,
-                transform=transform
-            ) as dataset:
-                dataset.write(data, 1)
-        
-        results['rasterio_functionality'] = {"status": "success", "test": "memory_raster_creation"}
-        
-    except Exception as e:
-        results['rasterio_functionality'] = {"status": "error", "error": str(e)}
-    
-    # Test environment variables
-    env_vars = ['OPENTOPO_API_KEY', 'GEMINI_API_KEY']
-    env_status = {}
-    for var in env_vars:
-        env_status[var] = {
-            "exists": var in os.environ,
-            "value_length": len(os.environ.get(var, ''))
-        }
-    
-    results['environment_variables'] = env_status
-    
-    return jsonify({
-        "status": "success",
-        "dependency_tests": results,
-        "summary": {
-            "total_dependencies": len(dependencies),
-            "successful": sum(1 for r in results.values() if isinstance(r, dict) and r.get("status") == "success"),
-            "failed": sum(1 for r in results.values() if isinstance(r, dict) and r.get("status") == "error")
-        }
-    }), 200
-    
-    
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
