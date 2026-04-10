@@ -13,13 +13,13 @@ import json
 from pathlib import Path
 
 import psycopg2
-from shapely.geometry import box, shape
+from shapely.geometry import box, shape, MultiPolygon, Polygon
 import geopandas as gpd
 from geopandas import GeoDataFrame
 import fiona
 
 
-GHANA_BOUNDARY_PATH = Path(__file__).parent.parent.parent / "FILES" / "ghana_border" / "geoBoundaries-GHA-ADM0.geojson"
+GHANA_BOUNDARY_PATH = Path(__file__).parent.parent.parent / "ghana_border" / "geoBoundaries-GHA-ADM0.geojson"
 GHANA_EPSG = 2136
 GRID_SIZE = 1000
 
@@ -35,6 +35,15 @@ def parse_geojson(path):
     with open(path) as f:
         data = json.load(f)
     return data
+
+
+def normalize_to_polygon(geom):
+    if geom.geom_type == "Polygon":
+        return geom
+    elif geom.geom_type == "MultiPolygon":
+        return max(geom.geoms, key=lambda g: g.area)
+    else:
+        return geom
 
 
 def create_grid_polygons(boundary_gdf):
@@ -95,8 +104,9 @@ def main():
     batch_size = 1000
 
     for idx, row in clipped_gdf.iterrows():
-        geom_wkt = row.geometry.wkt
-        centroid_wkt = row.centroid.wkt
+        normalized_geom = normalize_to_polygon(row.geometry)
+        geom_wkt = normalized_geom.wkt
+        centroid_wkt = normalized_geom.centroid.wkt
         cur.execute(
             """
             INSERT INTO ghana_grid (cell_id, geometry, centroid)

@@ -20,24 +20,20 @@ services:
       retries: 5
 
   seed:
-    image: postgis/postgis:16-3.4
+    build:
+      context: .
+      dockerfile: flask/Dockerfile.seed
     container_name: landoptima_seed
     depends_on:
       db:
         condition: service_healthy
     environment:
-      POSTGRES_DB: landoptima
-      POSTGRES_USER: landoptima
-      POSTGRES_PASSWORD: password
       DATABASE_URL: postgresql://landoptima:password@db:5432/landoptima
     volumes:
-      - .:/app
+      - ./flask:/app/flask
       - ./FILES/ghana_border:/app/ghana_border
-    working_dir: /app/flask
-    command: >
-      sh -c "pip install psycopg2-binary shapely geopandas fiona --quiet &&
-             python db/seed.py"
-    entrypoint: ["python"]
+    working_dir: /app
+    command: python flask/db/seed.py
 
   flask:
     build:
