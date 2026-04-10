@@ -1,0 +1,99 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e6] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e7]:
+      - img [ref=e8]
+    - generic [ref=e11]:
+      - button "Open issues overlay" [ref=e12]:
+        - generic [ref=e13]:
+          - generic [ref=e14]: "1"
+          - generic [ref=e15]: "2"
+        - generic [ref=e16]:
+          - text: Issue
+          - generic [ref=e17]: s
+      - button "Collapse issues badge" [ref=e18]:
+        - img [ref=e19]
+  - generic [ref=e22]:
+    - heading "LandOptima" [level=1] [ref=e23]
+    - paragraph [ref=e24]: Analyze terrain and environmental characteristics of your land
+    - generic [ref=e25]:
+      - generic [ref=e26]: "Project Name:"
+      - textbox "Project Name:" [ref=e27]:
+        - /placeholder: Enter project name
+        - text: Valid Test
+    - generic [ref=e28]:
+      - button "Map Selection" [ref=e29] [cursor=pointer]
+      - button "Manual Input" [ref=e30] [cursor=pointer]
+    - generic [ref=e31]:
+      - generic [ref=e52]: "Enter Coordinates JSON:"
+      - textbox "Enter Coordinates JSON:" [ref=e53]:
+        - /placeholder: "[[lat1,lon1], [lat2,lon2], ...]"
+        - text: "[[37.7, -122.4], [37.71, -122.39], [37.72, -122.38], [37.71, -122.37]]"
+      - button "Set Coordinates" [ref=e54] [cursor=pointer]
+    - generic [ref=e55]:
+      - heading "Selected Points:" [level=3] [ref=e56]
+      - generic [ref=e57]:
+        - generic [ref=e58]: "Point 1: [37.7000, -122.4000]"
+        - generic [ref=e59]: "Point 2: [37.7100, -122.3900]"
+        - generic [ref=e60]: "Point 3: [37.7200, -122.3800]"
+        - generic [ref=e66]: "Point 4: [37.7100, -122.3700]"
+      - generic [ref=e61]:
+        - generic [ref=e62]: ✓
+        - text: Boundary looks valid (2220m × 2550m area)
+    - button "Start Analysis" [ref=e69] [cursor=pointer]
+    - generic [ref=e70]:
+      - heading "Analysis Results" [level=2] [ref=e71]
+      - generic [ref=e72]:
+        - heading "AI Interpretation" [level=3] [ref=e73]
+        - code [ref=e76]: "**Analysis Results** **AI Interpretation** This land parcel presents a generally favorable profile for most development and agricultural purposes, based on the provided data. Let's break down each characteristic: **Terrain Analysis:** * **Slope:** The average slope of 2.353929281234741° is very gentle, practically flat to the untrained eye. The maximum slope of 24.235340118408203° is also quite mild, indicating relatively even terrain with minimal steep areas. This means construction would be relatively easy and inexpensive, and large-scale machinery operation would be straightforward. Minimal terracing or grading would likely be required. * **Aspect:** A E aspect means the land primarily faces E. This implies the land will receive significant afternoon sun exposure, which is important for factors like solar energy potential, plant growth (particularly sun-loving crops), and potential for solar-powered systems. However, it also implies higher potential for afternoon heat exposure. * **Elevation Range:** A 131.0-meter elevation range across the entire parcel suggests a relatively flat area. The exact implications depend on the overall size of the land; a 131.0-meter change over a large area is less significant than over a small one. Drainage is likely good given the gentle slope. **Environmental Risks:** * **Flood Risk Level: Low:** This is excellent news, significantly reducing potential costs and liabilities associated with flooding. Development and infrastructure can proceed with less concern about flood damage. * **Erosion Risk Level: Low:** Again, this is positive. Low erosion risk translates to less soil loss over time, meaning land remains productive and requires less maintenance for long-term stability. **Soil Characteristics:** * **pH: 6.5:** This pH level is considered slightly acidic, but falls within the optimal range for many plants. Most crops will thrive in this pH range without significant amendment. However, specific crop requirements should be checked. * **Organic Carbon: 2.0%:** A 2.0% organic carbon content is moderate. Higher levels are generally better for soil health, providing improved water retention, nutrient availability, and overall soil structure. While not excessively high, this level indicates reasonably fertile soil. * **Clay Content: 20.0%:** 20.0% clay content is considered a loamy soil texture. This is generally beneficial, providing good water retention and nutrient-holding capacity without becoming overly compacted or poorly drained. * **Sand Content: 40.0%:** Combined with the clay content, the 40.0% sand creates a sandy loam. Sandy loam soils drain well and are easy to work with, but may require more frequent watering, especially during dry periods, as they don't retain water as effectively as higher clay content soils. **Overall:** The land shows strong characteristics for a variety of uses. The gentle slope, low environmental risks, and moderate soil characteristics suggest suitability for agriculture, residential development, or light industrial applications. However, further investigation, including a detailed soil survey and potential geotechnical analysis, would be recommended before any significant development plans are finalized. Specifically, the exact size of the parcel and its location will affect how these characteristics impact its usability and value."
+      - generic [ref=e77]:
+        - heading "Terrain Statistics" [level=3] [ref=e78]
+        - generic [ref=e79]:
+          - generic [ref=e80]:
+            - generic [ref=e81]: "elevation range:"
+            - text: "131.00"
+          - generic [ref=e82]:
+            - generic [ref=e83]: "erosion risk max:"
+            - text: "75.29"
+          - generic [ref=e84]:
+            - generic [ref=e85]: "erosion risk mean:"
+            - text: "5.19"
+          - generic [ref=e86]:
+            - generic [ref=e87]: "flood risk max:"
+            - text: "1.00"
+          - generic [ref=e88]:
+            - generic [ref=e89]: "flood risk mean:"
+            - text: "0.09"
+          - generic [ref=e90]:
+            - generic [ref=e91]: "flow acc max:"
+            - text: "0.01"
+          - generic [ref=e92]:
+            - generic [ref=e93]: "flow acc mean:"
+            - text: "-26737.78"
+          - generic [ref=e94]:
+            - generic [ref=e95]: "max elevation:"
+            - text: "127.00"
+          - generic [ref=e96]:
+            - generic [ref=e97]: "max slope:"
+            - text: "24.24"
+          - generic [ref=e98]:
+            - generic [ref=e99]: "mean aspect:"
+            - text: "84.96"
+          - generic [ref=e100]:
+            - generic [ref=e101]: "mean elevation:"
+            - text: "10.21"
+          - generic [ref=e102]:
+            - generic [ref=e103]: "mean slope:"
+            - text: "2.35"
+          - generic [ref=e104]:
+            - generic [ref=e105]: "min elevation:"
+            - text: "-4.00"
+          - generic [ref=e106]:
+            - generic [ref=e107]: "min slope:"
+            - text: "0.00"
+          - generic [ref=e108]:
+            - generic [ref=e109]: "predominant direction:"
+            - text: E
+          - generic [ref=e110]:
+            - generic [ref=e111]: "steep areas percent:"
+            - text: "0.00"
+  - alert [ref=e51]

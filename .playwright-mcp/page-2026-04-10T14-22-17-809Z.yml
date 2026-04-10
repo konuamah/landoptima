@@ -1,0 +1,87 @@
+- generic:
+  - generic [active]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]:
+          - navigation [ref=e6]:
+            - button "previous" [disabled] [ref=e7]:
+              - img "previous" [ref=e8]
+            - generic [ref=e10]:
+              - generic [ref=e11]: 1/
+              - text: "1"
+            - button "next" [disabled] [ref=e12]:
+              - img "next" [ref=e13]
+          - img
+        - generic [ref=e15]:
+          - generic [ref=e16]:
+            - img [ref=e17]
+            - generic "Latest available version is detected (16.2.3)." [ref=e19]: Next.js 16.2.3
+            - generic [ref=e20]: Turbopack
+          - img
+      - dialog "Build Error" [ref=e102]:
+        - generic [ref=e25]:
+          - generic [ref=e26]:
+            - generic [ref=e27]:
+              - generic [ref=e29]: Build Error
+              - generic [ref=e30]:
+                - button "Copy Error Info" [ref=e31] [cursor=pointer]:
+                  - img [ref=e32]
+                - button "No related documentation found" [disabled] [ref=e34]:
+                  - img [ref=e35]
+                - button "Attach Node.js inspector" [ref=e37] [cursor=pointer]:
+                  - img [ref=e38]
+            - generic [ref=e47]: Expected ',', got ']'
+          - generic [ref=e49]:
+            - generic [ref=e51]:
+              - img [ref=e53]
+              - generic [ref=e56]: ./Documents/GitHub/landoptima/frontend/landoptima/src/app/LandAnalysis.tsx (42:62)
+              - button "Open in editor" [ref=e57] [cursor=pointer]:
+                - img [ref=e59]
+            - generic [ref=e62]:
+              - generic [ref=e63]: Expected ',', got ']'
+              - generic [ref=e64]: 40 |
+              - text: const
+              - generic [ref=e65]: lats = coords.map(p => p[
+              - text: "0"
+              - generic [ref=e66]: "]);"
+              - generic [ref=e67]: 41 |
+              - text: const
+              - generic [ref=e68]: lons = coords.map(p => p[
+              - text: "1"
+              - generic [ref=e69]: "]);"
+              - text: ">"
+              - generic [ref=e70]: 42 |
+              - text: const
+              - generic [ref=e71]: latRange =
+              - text: Math
+              - generic [ref=e72]: .max(...lats) -
+              - text: Math
+              - generic [ref=e73]: .min(...lats]);
+              - generic [ref=e74]: "|"
+              - text: ^
+              - generic [ref=e75]: 43 |
+              - text: const
+              - generic [ref=e76]: lonRange =
+              - text: Math
+              - generic [ref=e77]: .max(...lons) -
+              - text: Math
+              - generic [ref=e78]: .min(...lons]);
+              - generic [ref=e79]: 44 |
+              - generic [ref=e80]: 45 |
+              - text: if
+              - generic [ref=e81]: (latRange <
+              - text: "0.0001"
+              - generic [ref=e82]: "|| lonRange <"
+              - text: "0.0001"
+              - generic [ref=e83]: ") { Parsing ecmascript source code failed Import trace: Server Component: ./Documents/GitHub/landoptima/frontend/landoptima/src/app/LandAnalysis.tsx ./Documents/GitHub/landoptima/frontend/landoptima/src/app/page.tsx"
+        - generic [ref=e84]: "1"
+        - generic [ref=e85]: "2"
+    - generic [ref=e90] [cursor=pointer]:
+      - button "Open Next.js Dev Tools" [ref=e91]:
+        - img [ref=e92]
+      - button "Open issues overlay" [ref=e96]:
+        - generic [ref=e97]:
+          - generic [ref=e98]: "0"
+          - generic [ref=e99]: "1"
+        - generic [ref=e100]: Issue
+  - alert [ref=e101]

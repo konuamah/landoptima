@@ -1,0 +1,31 @@
+- generic [ref=e1]:
+  - generic [ref=e6] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e7]:
+      - img [ref=e8]
+    - generic [ref=e11]:
+      - button "Open issues overlay" [ref=e12]:
+        - generic [ref=e13]:
+          - generic [ref=e14]: "1"
+          - generic [ref=e15]: "2"
+        - generic [ref=e16]:
+          - text: Issue
+          - generic [ref=e17]: s
+      - button "Collapse issues badge" [ref=e18]:
+        - img [ref=e19]
+  - generic [ref=e22]:
+    - heading "LandOptima" [level=1] [ref=e23]
+    - paragraph [ref=e24]: Analyze terrain and environmental characteristics of your land
+    - generic [ref=e25]:
+      - generic [ref=e26]: "Project Name:"
+      - textbox "Project Name:" [ref=e27]:
+        - /placeholder: Enter project name
+    - generic [ref=e28]:
+      - button "Map Selection" [ref=e29] [cursor=pointer]
+      - button "Manual Input" [active] [ref=e30] [cursor=pointer]
+    - generic [ref=e31]:
+      - generic [ref=e52]: "Enter Coordinates JSON:"
+      - textbox "Enter Coordinates JSON:" [ref=e53]:
+        - /placeholder: "[[lat1,lon1], [lat2,lon2], ...]"
+      - button "Set Coordinates" [ref=e54] [cursor=pointer]
+    - button "Select boundary points on map and click Next" [disabled] [ref=e50]
+  - alert [ref=e51]

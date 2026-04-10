@@ -33,12 +33,43 @@ const LandAnalysisApp: React.FC = () => {
         );
     };
 
+    const validateBoundaryArea = (coords: Boundaries): string | null => {
+        if (coords.length < 3) {
+            return `Select at least 3 points (currently ${coords.length})`;
+        }
+        const lats = coords.map(p => p[0]);
+        const lons = coords.map(p => p[1]);
+        const latRange = Math.max(...lats) - Math.min(...lats);
+        const lonRange = Math.max(...lons) - Math.min(...lons);
+        
+        const MIN_RANGE = 0.0001;
+        const MAX_LAT_RANGE = 0.1;  // ~11km
+        const MAX_LON_RANGE = 0.15; // ~13km at mid-latitudes
+        
+        if (latRange < MIN_RANGE || lonRange < MIN_RANGE) {
+            return `Boundary too small. Spread points apart (lat range: ${latRange.toFixed(6)}°, lon range: ${lonRange.toFixed(6)}°)`;
+        }
+        if (latRange > MAX_LAT_RANGE || lonRange > MAX_LON_RANGE) {
+            return `Boundary too large. Keep area under ${MAX_LAT_RANGE}° lat × ${MAX_LON_RANGE}° lon (~11km × 13km max)`;
+        }
+        return null;
+    };
+
+    const boundaryValidation = boundaries.length > 0 ? validateBoundaryArea(boundaries) : null;
+
     const handleManualInput = (): void => {
         try {
             const parsed = JSON.parse(manualInput);
             if (Array.isArray(parsed) && validateCoordinates(parsed)) {
+                const areaError = validateBoundaryArea(parsed);
                 setBoundaries(parsed);
-                setError(null);
+                setBoundaryConfirmed(!areaError);
+                console.log('[LandAnalysis] Manual coordinates set:', parsed, areaError ? `(${areaError})` : '(valid)');
+                if (areaError) {
+                    setError(areaError);
+                } else {
+                    setError(null);
+                }
             } else {
                 setError("Invalid coordinate format. Please use format: [[lat1,lon1], [lat2,lon2], ...]");
             }
@@ -51,12 +82,25 @@ const LandAnalysisApp: React.FC = () => {
         }
     };
 
+    const [boundaryConfirmed, setBoundaryConfirmed] = useState<boolean>(false);
+
     const handleBoundaryComplete = (polygonCoordinates: BoundaryPoint[]): void => {
         const convertedCoordinates: BoundaryPoint[] = polygonCoordinates.map(point => [point[1], point[0]]);
+        console.log('[LandAnalysis] Boundary points received:', convertedCoordinates);
+        const areaError = validateBoundaryArea(convertedCoordinates);
         setBoundaries(convertedCoordinates);
+        setBoundaryConfirmed(!areaError);
+        if (areaError) {
+            setError(areaError);
+        } else {
+            setError(null);
+        }
+        console.log('[LandAnalysis] Boundary confirmed, count:', convertedCoordinates.length, areaError ? `(${areaError})` : '(valid)');
     };
 
     const handleAnalysis = async (): Promise<void> => {
+        console.log('[LandAnalysis] handleAnalysis called', { projectName, boundariesCount: boundaries.length, boundaryConfirmed });
+        
         if (!projectName || boundaries.length < 3) {
             setError("Please enter a project name and select at least 3 boundary points.");
             return;
@@ -67,11 +111,14 @@ const LandAnalysisApp: React.FC = () => {
             return;
         }
 
+        console.log('[LandAnalysis] Starting analysis with:', { projectName, boundaries });
         setLoading(true);
         setError(null);
 
+        console.log('[LandAnalysis] Sending request to backend...');
         try {
-            const response = await fetch('http://localhost:5000/analyze-land', {
+            console.log('[LandAnalysis] Fetch starting...', { url: 'http://localhost:5001/analyze-land', projectName, boundaries });
+            const response = await fetch('http://localhost:5001/analyze-land', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -81,15 +128,19 @@ const LandAnalysisApp: React.FC = () => {
                     boundaries,
                 }),
             });
+            console.log('[LandAnalysis] Response received', { status: response.status, ok: response.ok });
 
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Analysis failed');
             }
 
+            console.log('[LandAnalysis] Parsing JSON...');
             const data: AnalysisResult = await response.json();
+            console.log('[LandAnalysis] JSON parsed successfully', data);
             setResult(data);
         } catch (err) {
+            console.error('[LandAnalysis] Fetch error:', err);
             if (err instanceof Error) {
                 setError(err.message);
             } else {
@@ -141,6 +192,21 @@ const LandAnalysisApp: React.FC = () => {
             {/* Map or Manual Input Section */}
             {inputMethod === 'map' ? (
                 <div className="mb-6 border border-gray-300 rounded-lg overflow-hidden">
+                    <div className={`p-3 border-b border-gray-300 ${boundaryValidation ? 'bg-red-50' : boundaries.length >= 3 ? 'bg-green-50' : 'bg-blue-50'}`}>
+                        <span className={boundaryValidation ? 'text-red-700' : boundaries.length >= 3 ? 'text-green-700' : 'text-blue-700'}>
+                            {boundaryConfirmed ? (
+                                boundaryValidation ? `⚠️ ${boundaryValidation}` : `✓ Boundary confirmed with ${boundaries.length} points`
+                            ) : boundaries.length === 0 ? (
+                                'Click on map to select points, then click "Next"'
+                            ) : boundaries.length < 3 ? (
+                                `Select at least 3 points (currently ${boundaries.length})`
+                            ) : boundaryValidation ? (
+                                boundaryValidation
+                            ) : (
+                                `${boundaries.length} points selected - click "Next" to confirm`
+                            )}
+                        </span>
+                    </div>
                     <Map onBoundaryComplete={handleBoundaryComplete} />
                 </div>
             ) : (
@@ -166,23 +232,32 @@ const LandAnalysisApp: React.FC = () => {
             {boundaries.length > 0 && (
                 <div className="mb-6 p-4 bg-white rounded-lg border border-gray-300">
                     <h3 className="text-lg font-medium mb-2 text-gray-800">Selected Points:</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3">
                         {boundaries.map((point, index) => (
                             <div key={index} className="p-2 bg-gray-50 rounded border border-gray-200 text-gray-700">
                                 Point {index + 1}: [{point[0].toFixed(4)}, {point[1].toFixed(4)}]
                             </div>
                         ))}
                     </div>
+                    {boundaryValidation ? (
+                        <div className="text-red-600 text-sm flex items-center gap-2">
+                            <span className="font-medium">⚠️ Invalid:</span> {boundaryValidation}
+                        </div>
+                    ) : (
+                        <div className="text-green-600 text-sm flex items-center gap-2">
+                            <span>✓</span> Boundary looks valid ({((Math.max(...boundaries.map(p => p[0])) - Math.min(...boundaries.map(p => p[0]))) * 111 * 1000).toFixed(0)}m × {((Math.max(...boundaries.map(p => p[1])) - Math.min(...boundaries.map(p => p[1]))) * 85 * 1000).toFixed(0)}m area)
+                        </div>
+                    )}
                 </div>
             )}
 
             {/* Start Analysis Button */}
             <button 
                 onClick={handleAnalysis} 
-                disabled={loading}
+                disabled={loading || !boundaryConfirmed || boundaries.length < 3 || !projectName}
                 className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed mb-6 transition-colors"
             >
-                {loading ? 'Analyzing...' : 'Start Analysis'}
+                {loading ? 'Analyzing...' : boundaryConfirmed ? 'Start Analysis' : 'Select boundary points on map and click Next'}
             </button>
 
             {/* Error Display */}

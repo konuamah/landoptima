@@ -8,28 +8,23 @@ import subprocess
 import os
 from datetime import datetime
 from typing import Dict, Any, List, Tuple
-import google.generativeai as genai
-from google.generativeai import GenerativeModel
+import anthropic
 
-# Initialize Flask app
 app = Flask(__name__)
 CORS(app)
 
-# Configuration class
 class Config:
     OPENTOPO_API_URL = "https://portal.opentopography.org/API/globaldem"
     OPENTOPO_API_KEY = os.getenv('OPENTOPO_API_KEY', 'YOUR_API_KEY_HERE')
     SOILGRIDS_API_URL = "https://rest.isric.org/soilgrids/v2.0/properties/query"
-    GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'YOUR_GEMINI_API_KEY')
+    MINIMAX_API_KEY = os.getenv('MINIMAX_API_KEY', 'YOUR_MINIMAX_API_KEY')
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
-    WHITEBOX_DIR = "/whitebox/WBT"  # where it's copied inside Docker
-    WHITEBOX_BINARY = "/whitebox/WBT/whitebox_tools"  # Direct path to binary
+    WHITEBOX_DIR = "/whitebox/WBT"
+    WHITEBOX_BINARY = "/whitebox/WBT/whitebox_tools"
 
-# Configure Gemini AI
-genai.configure(api_key=Config.GEMINI_API_KEY)
-model = GenerativeModel('gemini-1.5-flash')
-
-# WhiteboxTools Direct Binary Interface
+os.environ["ANTHROPIC_BASE_URL"] = "https://api.minimax.io/anthropic"
+os.environ["ANTHROPIC_API_KEY"] = Config.MINIMAX_API_KEY
+client = anthropic.Anthropic()
 class WhiteboxToolsDirect:
     def __init__(self, binary_path: str):
         self.binary_path = binary_path
@@ -161,6 +156,16 @@ class DEMProcessor:
         min_lon = min(point[1] for point in boundaries)
         max_lon = max(point[1] for point in boundaries)
 
+        lat_range = max_lat - min_lat
+        lon_range = max_lon - min_lon
+        
+        if lat_range < 0.0001 or lon_range < 0.0001:
+            raise Exception(
+                f"Invalid boundary area. Your selected points form a region that is too small "
+                f"(latitude range: {lat_range:.6f}°, longitude range: {lon_range:.6f}°). "
+                f"Please select points that form a polygon with at least ~100 meters between them."
+            )
+
         params = {
             "demtype": "SRTMGL3",
             "south": min_lat,
@@ -173,6 +178,12 @@ class DEMProcessor:
 
         try:
             response = requests.get(Config.OPENTOPO_API_URL, params=params)
+            if response.status_code == 400:
+                raise Exception(
+                    f"OpenTopography rejected the bounding box. Please ensure your boundary points "
+                    f"form a valid polygon area (current: lat {min_lat:.4f} to {max_lat:.4f}, "
+                    f"lon {min_lon:.4f} to {max_lon:.4f})."
+                )
             response.raise_for_status()
             
             dem_path = Utils.safe_file_path(project_name, "dem")
@@ -391,15 +402,20 @@ class TerrainStatistics:
 # AI Interpretation
 class LandAnalysisInterpreter:
     def __init__(self):
-        self.model = model
+        self.client = client
 
     def generate_interpretation(self, analysis_data: Dict[str, Any]) -> str:
-        """Generate a natural language interpretation using Gemini AI."""
+        """Generate a natural language interpretation using MiniMax AI."""
         prompt = self._create_analysis_prompt(analysis_data)
 
         try:
-            response = self.model.generate_content(prompt)
-            return response.text
+            response = self.client.messages.create(
+                model="MiniMax-M2.7",
+                max_tokens=2000,
+                system="You are a helpful land analysis assistant.",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return response.content[0].text
         except Exception as e:
             print(f"Error generating AI interpretation: {str(e)}")
             return self._generate_fallback_interpretation(analysis_data)
@@ -549,7 +565,7 @@ def analyze_land():
         from threading import Thread
         Thread(target=cleanup_old_files).start()
 
-        return jsonify({
+        response_data = {
             "message": "Land analysis completed successfully",
             "statistics": statistics,
             "environmental_assessment": environmental_assessment,
@@ -563,7 +579,9 @@ def analyze_land():
                 "flood_risk": flood_risk_file,
                 "erosion_risk": erosion_risk_file
             }
-        }), 200
+        }
+        print(f"[DEBUG] Sending response: ai_interpretation type={type(interpretation)}, length={len(interpretation) if interpretation else 0}")
+        return jsonify(response_data), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

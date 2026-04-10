@@ -1,0 +1,57 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: landoptima_db
+    environment:
+      POSTGRES_DB: landoptima
+      POSTGRES_USER: landoptima
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./flask/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U landoptima -d landoptima"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  seed:
+    image: postgis/postgis:16-3.4
+    container_name: landoptima_seed
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      POSTGRES_DB: landoptima
+      POSTGRES_USER: landoptima
+      POSTGRES_PASSWORD: password
+      DATABASE_URL: postgresql://landoptima:password@db:5432/landoptima
+    volumes:
+      - .:/app
+      - ./FILES/ghana_border:/app/ghana_border
+    working_dir: /app/flask
+    command: >
+      sh -c "pip install psycopg2-binary shapely geopandas fiona --quiet &&
+             python db/seed.py"
+    entrypoint: ["python"]
+
+  flask:
+    build:
+      context: ./flask
+      dockerfile: Dockerfile
+    container_name: landoptima_flask
+    environment:
+      DATABASE_URL: postgresql://landoptima:password@db:5432/landoptima
+    depends_on:
+      - db
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./flask/.env:/app/.env
+
+volumes:
+  postgres_data:

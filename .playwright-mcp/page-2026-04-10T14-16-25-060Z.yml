@@ -1,0 +1,64 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e6] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e7]:
+      - img [ref=e8]
+    - generic [ref=e11]:
+      - button "Open issues overlay" [ref=e12]:
+        - generic [ref=e68]:
+          - generic [ref=e69]: "2"
+          - generic [ref=e70]: "3"
+        - generic [ref=e16]:
+          - text: Issue
+          - generic [ref=e17]: s
+      - button "Collapse issues badge" [ref=e18]:
+        - img [ref=e19]
+  - generic [ref=e22]:
+    - heading "LandOptima" [level=1] [ref=e23]
+    - paragraph [ref=e24]: Analyze terrain and environmental characteristics of your land
+    - generic [ref=e25]:
+      - generic [ref=e26]: "Project Name:"
+      - textbox "Project Name:" [ref=e27]:
+        - /placeholder: Enter project name
+        - text: Playwright Test
+    - generic [ref=e28]:
+      - button "Map Selection" [ref=e29] [cursor=pointer]
+      - button "Manual Input" [ref=e30] [cursor=pointer]
+    - generic [ref=e31]:
+      - generic [ref=e32]: ✓ Boundary confirmed with 3 points
+      - generic [ref=e33]:
+        - generic [ref=e34]:
+          - generic:
+            - generic:
+              - img
+            - generic:
+              - button "Marker" [ref=e58] [cursor=pointer]
+              - button "Marker" [ref=e59] [cursor=pointer]
+              - button "Marker" [ref=e60] [cursor=pointer]
+          - generic:
+            - generic [ref=e35]:
+              - button "Zoom in" [ref=e36] [cursor=pointer]: +
+              - button "Zoom out" [ref=e37] [cursor=pointer]: −
+            - generic [ref=e38]:
+              - link "Leaflet" [ref=e39] [cursor=pointer]:
+                - /url: https://leafletjs.com
+                - img [ref=e40]
+                - text: Leaflet
+              - text: "| ©"
+              - link "OpenStreetMap" [ref=e44] [cursor=pointer]:
+                - /url: https://www.openstreetmap.org/copyright
+        - generic [ref=e45]:
+          - button "Undo" [ref=e46] [cursor=pointer]
+          - button "Clear Last Point" [ref=e47] [cursor=pointer]
+          - button "Clear All Points" [ref=e48] [cursor=pointer]
+          - button "Next" [ref=e49] [cursor=pointer]
+    - generic [ref=e61]:
+      - heading "Selected Points:" [level=3] [ref=e62]
+      - generic [ref=e63]:
+        - generic [ref=e64]: "Point 1: [37.6838, -122.4426]"
+        - generic [ref=e65]: "Point 2: [37.7577, -122.4399]"
+        - generic [ref=e66]: "Point 3: [37.7577, -122.4399]"
+    - button "Start Analysis" [ref=e67] [cursor=pointer]
+    - generic [ref=e71]:
+      - heading "Error" [level=2] [ref=e72]
+      - paragraph [ref=e73]: "OpenTopography rejected the bounding box. Please ensure your boundary points form a valid polygon area (current: lat 37.6838 to 37.7577, lon -122.4426 to -122.4399)."
+  - alert [ref=e51]

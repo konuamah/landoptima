@@ -5,15 +5,12 @@ FROM python:3.12-slim
 WORKDIR /app
 
 # Install system packages needed by WhiteboxTools AND for building some Python packages
-# - gdal-bin, libgdal-dev: for working with raster data
-# - build-essential: tools like gcc/g++ needed to compile packages like numpy
-# - python3-dev: Python headers required for native extensions
-# - wget, unzip: for file handling
 RUN apt-get update && apt-get install -y \
     gdal-bin \
     libgdal-dev \
     build-essential \
     python3-dev \
+    python3-pip \
     wget \
     unzip \
     && rm -rf /var/lib/apt/lists/*
@@ -21,14 +18,19 @@ RUN apt-get update && apt-get install -y \
 # Upgrade pip and install setuptools + wheel early to prevent build errors for some packages
 RUN pip install --upgrade pip setuptools wheel
 
+# Install Python packages - use binary wheels where possible
+# First install rasterio from binary to avoid build issues
+RUN pip install --only-binary=:all: rasterio numpy
+
+# Install remaining packages
+RUN pip install --no-cache-dir Flask==2.3.2 Flask-CORS==4.0.0 whitebox==2.2.0 requests==2.31.0 anthropic python-dotenv==1.0.0 pathlib datetime psycopg2-binary
+
 # Copy the Flask application code and requirements.txt file into the container
 COPY app.py requirements.txt /app/
 
 # Copy the WhiteboxTools Linux folder to /whitebox/WBT inside the container
 COPY WBT /whitebox/WBT
-
-# Install Python packages listed in requirements.txt without using pip's cache
-RUN pip install --no-cache-dir -r requirements.txt
+RUN chmod +x /whitebox/WBT/whitebox_tools
 
 # Set environment variable so your app knows where WhiteboxTools is located
 ENV WHITEBOX_DIR=/whitebox/WBT

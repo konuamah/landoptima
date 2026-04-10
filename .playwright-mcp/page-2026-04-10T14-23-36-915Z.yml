@@ -1,0 +1,43 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e6] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e7]:
+      - img [ref=e8]
+    - generic [ref=e11]:
+      - button "Open issues overlay" [ref=e12]:
+        - generic [ref=e13]:
+          - generic [ref=e14]: "1"
+          - generic [ref=e15]: "2"
+        - generic [ref=e16]:
+          - text: Issue
+          - generic [ref=e17]: s
+      - button "Collapse issues badge" [ref=e18]:
+        - img [ref=e19]
+  - generic [ref=e22]:
+    - heading "LandOptima" [level=1] [ref=e23]
+    - paragraph [ref=e24]: Analyze terrain and environmental characteristics of your land
+    - generic [ref=e25]:
+      - generic [ref=e26]: "Project Name:"
+      - textbox "Project Name:" [ref=e27]:
+        - /placeholder: Enter project name
+        - text: Valid Test
+    - generic [ref=e28]:
+      - button "Map Selection" [ref=e29] [cursor=pointer]
+      - button "Manual Input" [ref=e30] [cursor=pointer]
+    - generic [ref=e31]:
+      - generic [ref=e52]: "Enter Coordinates JSON:"
+      - textbox "Enter Coordinates JSON:" [ref=e53]:
+        - /placeholder: "[[lat1,lon1], [lat2,lon2], ...]"
+        - text: "[[37.7, -122.4], [37.71, -122.39], [37.72, -122.38], [37.71, -122.37]]"
+      - button "Set Coordinates" [ref=e54] [cursor=pointer]
+    - generic [ref=e55]:
+      - heading "Selected Points:" [level=3] [ref=e56]
+      - generic [ref=e57]:
+        - generic [ref=e58]: "Point 1: [37.7000, -122.4000]"
+        - generic [ref=e59]: "Point 2: [37.7100, -122.3900]"
+        - generic [ref=e60]: "Point 3: [37.7200, -122.3800]"
+        - generic [ref=e66]: "Point 4: [37.7100, -122.3700]"
+      - generic [ref=e61]:
+        - generic [ref=e62]: ✓
+        - text: Boundary looks valid (2220m × 2550m area)
+    - button "Analyzing..." [disabled] [ref=e68]
+  - alert [ref=e51]

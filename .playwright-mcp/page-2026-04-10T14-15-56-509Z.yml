@@ -1,0 +1,54 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e6] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e7]:
+      - img [ref=e8]
+    - generic [ref=e11]:
+      - button "Open issues overlay" [ref=e12]:
+        - generic [ref=e13]:
+          - generic [ref=e14]: "1"
+          - generic [ref=e15]: "2"
+        - generic [ref=e16]:
+          - text: Issue
+          - generic [ref=e17]: s
+      - button "Collapse issues badge" [ref=e18]:
+        - img [ref=e19]
+  - generic [ref=e22]:
+    - heading "LandOptima" [level=1] [ref=e23]
+    - paragraph [ref=e24]: Analyze terrain and environmental characteristics of your land
+    - generic [ref=e25]:
+      - generic [ref=e26]: "Project Name:"
+      - textbox "Project Name:" [ref=e27]:
+        - /placeholder: Enter project name
+        - text: Playwright Test
+    - generic [ref=e28]:
+      - button "Map Selection" [ref=e29] [cursor=pointer]
+      - button "Manual Input" [ref=e30] [cursor=pointer]
+    - generic [ref=e31]:
+      - generic [ref=e32]: Click on map to select points, then click "Next"
+      - generic [ref=e33]:
+        - generic [ref=e34]:
+          - generic:
+            - generic:
+              - img
+            - generic:
+              - button "Marker" [ref=e54] [cursor=pointer]
+              - button "Marker" [ref=e55] [cursor=pointer]
+          - generic:
+            - generic [ref=e35]:
+              - button "Zoom in" [ref=e36] [cursor=pointer]: +
+              - button "Zoom out" [ref=e37] [cursor=pointer]: −
+            - generic [ref=e38]:
+              - link "Leaflet" [ref=e39] [cursor=pointer]:
+                - /url: https://leafletjs.com
+                - img [ref=e40]
+                - text: Leaflet
+              - text: "| ©"
+              - link "OpenStreetMap" [ref=e44] [cursor=pointer]:
+                - /url: https://www.openstreetmap.org/copyright
+        - generic [ref=e45]:
+          - button "Undo" [ref=e46] [cursor=pointer]
+          - button "Clear Last Point" [ref=e47] [cursor=pointer]
+          - button "Clear All Points" [ref=e48] [cursor=pointer]
+          - button "Next" [ref=e49] [cursor=pointer]
+    - button "Select boundary points on map and click Next" [disabled] [ref=e50]
+  - alert [ref=e51]

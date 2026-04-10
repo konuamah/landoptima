@@ -1,0 +1,49 @@
+- generic [ref=e1]:
+  - generic [ref=e6] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e7]:
+      - img [ref=e8]
+    - generic [ref=e11]:
+      - button "Open issues overlay" [ref=e12]:
+        - generic [ref=e13]:
+          - generic [ref=e14]: "0"
+          - generic [ref=e15]: "1"
+        - generic [ref=e16]: Issue
+      - button "Collapse issues badge" [ref=e17]:
+        - img [ref=e18]
+  - generic [ref=e21]:
+    - heading "LandOptima" [level=1] [ref=e22]
+    - paragraph [ref=e23]: Analyze terrain and environmental characteristics of your land
+    - generic [ref=e24]:
+      - generic [ref=e25]: "Project Name:"
+      - textbox "Project Name:" [ref=e26]:
+        - /placeholder: Enter project name
+    - generic [ref=e27]:
+      - button "Map Selection" [ref=e28] [cursor=pointer]
+      - button "Manual Input" [ref=e29] [cursor=pointer]
+    - generic [ref=e30]:
+      - generic [ref=e31]: Click on map to select points, then click "Next"
+      - generic [ref=e32]:
+        - generic [active] [ref=e33]:
+          - generic:
+            - generic:
+              - img
+            - button "Marker" [ref=e51] [cursor=pointer]
+          - generic:
+            - generic [ref=e34]:
+              - button "Zoom in" [ref=e35] [cursor=pointer]: +
+              - button "Zoom out" [ref=e36] [cursor=pointer]: −
+            - generic [ref=e37]:
+              - link "Leaflet" [ref=e38] [cursor=pointer]:
+                - /url: https://leafletjs.com
+                - img [ref=e39]
+                - text: Leaflet
+              - text: "| ©"
+              - link "OpenStreetMap" [ref=e43] [cursor=pointer]:
+                - /url: https://www.openstreetmap.org/copyright
+        - generic [ref=e44]:
+          - button "Undo" [ref=e45] [cursor=pointer]
+          - button "Clear Last Point" [ref=e46] [cursor=pointer]
+          - button "Clear All Points" [ref=e47] [cursor=pointer]
+          - button "Next" [ref=e48] [cursor=pointer]
+    - button "Select boundary points on map and click Next" [disabled] [ref=e49]
+  - alert [ref=e50]
