@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   db:
     image: postgis/postgis:16-3.4
@@ -9,7 +7,7 @@ services:
       POSTGRES_USER: landoptima
       POSTGRES_PASSWORD: password
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./flask/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
@@ -29,6 +27,7 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://landoptima:password@db:5432/landoptima
+      PYTHONUNBUFFERED: "1"
     volumes:
       - ./flask:/app/flask
       - ./FILES/ghana_border:/app/ghana_border

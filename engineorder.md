@@ -25,15 +25,15 @@ Phase 2 split into 4 independent work packages:
 Work Package A: Data Infrastructure (Prerequisite for all others)
 Can start immediately — no dependencies
 Task	What
-A1	PostGIS schema + seed Ghana grid
-A2	Data layer loader (data_layers.py)
-A3	OSM road cost raster
+A1	PostGIS schema + seed Ghana grid---complete
+A2	Data layer loader (data_layers.py)-- complete
+A3	OSM road cost raster --  complete
 Parallel with: Nothing blocking A1 and A3. A2 needs A1 done first.
 ---
 Work Package B: The Optimization Engine
 Depends on: A2 (data loader)
 Task	What
-B1	SA core engine
+B1	SA core engine --- complete
 B2	Validation + uncertainty flags
 B3	Nightly runner + write to PostGIS
 ---
