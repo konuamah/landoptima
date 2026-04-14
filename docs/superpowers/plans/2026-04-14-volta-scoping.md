@@ -164,13 +164,43 @@ Verify against actual Ghana administrative boundaries — adjust if Volta Region
 
 ---
 
-## Decision Points
+## Decision Points — RESOLVED
 
-- [ ] **Rectangular bbox vs. actual Volta polygon?** Rectangular is simpler; actual boundary is more precise but requires shapefile masking.
-- [ ] **Keep Ghana tables or remove?** Keep as reference/future expansion.
-- [ ] **Rename endpoints or make region-aware?** Option A: separate `/lookup-volta`. Option B: `/lookup-land?region=volta`.
+| Decision | Resolution |
+|----------|------------|
+| **Bounding box source** | Download Volta polygon from HDX Ghana ADM1 dataset (`gha_admin_boundaries.geojson.zip`) |
+| **Endpoint naming** | Separate `/lookup-volta` and `/internal/run-optimization-volta` |
+| **Keep Ghana tables** | Yes — keep `ghana_grid` + `ghana_allocation` side-by-side with new Volta tables |
+| **Schema approach** | Add `volta_grid` + `volta_allocation` as new tables in same DB |
+
+## Volta Bounding Box (Exact — from HDX ADM1 shapefile)
+
+```
+VOLTA_EXTENT: Derived from geoBoundaries Ghana ADM1 "Volta Region" polygon
+Resolution: 1km (0.00833°)
+Approximate bbox: west ~0.0, east ~2.1, south ~6.1, north ~8.9
+Final coordinates to be extracted from downloaded shapefile.
+```
+
+## Grid Generation Strategy
+
+- Generate 1km cells as polygons
+- Use PostGIS `ST_Intersects` to mask cells falling within Volta polygon
+- Count only cells with centroids inside the polygon (or use 50% coverage rule)
+- Expected cell count: ~20,570 (may vary slightly based on polygon precision)
+
+## Implementation Approach
+
+Side-by-side tables:
+
+```
+ghana_grid       → existing (keep as-is)
+ghana_allocation → existing (keep as-is)
+volta_grid       → NEW (Volta Region 1km cells)
+volta_allocation → NEW (SA results for Volta)
+```
 
 ---
 
-*Document version 1.0 — Volta Region scoping*  
+*Document version 1.1 — decisions locked*  
 *Date: April 2026*
