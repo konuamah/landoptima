@@ -27,6 +27,8 @@ RUN pip install --no-cache-dir Flask==2.3.2 Flask-CORS==4.0.0 whitebox==2.2.0 re
 
 # Copy the Flask application code and requirements.txt file into the container
 COPY app.py requirements.txt /app/
+COPY optimization /app/optimization
+COPY db /app/db
 
 # Copy the WhiteboxTools Linux folder to /whitebox/WBT inside the container
 COPY WBT /whitebox/WBT

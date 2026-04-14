@@ -47,6 +47,24 @@ services:
       - "5000:5000"
     volumes:
       - ./flask/.env:/app/.env
+      - ./FILES/ghana_adm1:/app/FILES/ghana_adm1
+
+  seed-volta:
+    build:
+      context: .
+      dockerfile: flask/Dockerfile.seed
+    container_name: landoptima_seed_volta
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://landoptima:password@db:5432/landoptima
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ./flask:/app/flask
+      - ./FILES/ghana_adm1:/app/FILES/ghana_adm1
+    working_dir: /app
+    command: python -m flask.db.seed_volta --clip /app/FILES/ghana_adm1/volta_region.wkt
 
 volumes:
   postgres_data:
