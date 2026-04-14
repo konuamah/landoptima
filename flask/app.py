@@ -10,8 +10,12 @@ from datetime import datetime
 from typing import Dict, Any, List, Tuple
 import anthropic
 
+from flask.optimization.api_volta import volta_bp
+
 app = Flask(__name__)
 CORS(app)
+
+app.register_blueprint(volta_bp)
 
 class Config:
     OPENTOPO_API_URL = "https://portal.opentopography.org/API/globaldem"

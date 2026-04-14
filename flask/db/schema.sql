@@ -44,3 +44,41 @@ CREATE TABLE ghana_allocation (
 CREATE INDEX ghana_allocation_geom_idx ON ghana_allocation USING GIST(geometry);
 CREATE INDEX ghana_allocation_cell_idx ON ghana_allocation(cell_id);
 CREATE INDEX ghana_allocation_type_idx ON ghana_allocation(allocation);
+
+-- ============================================================
+-- Volta Region tables (1km x 1km resolution)
+-- Bounding box derived from geoBoundaries Ghana ADM1 "Volta Region"
+-- ============================================================
+
+CREATE TABLE volta_grid (
+    id SERIAL PRIMARY KEY,
+    cell_id INTEGER UNIQUE NOT NULL,
+    geometry Geometry(Polygon, 2136) NOT NULL,
+    centroid Geometry(Point, 2136),
+    twi FLOAT,
+    sca_ha FLOAT,
+    elevation_mean FLOAT,
+    slope_mean FLOAT,
+    created_at TIMESTAMP DEFAULT now()
+);
+
+CREATE INDEX volta_grid_geom_idx ON volta_grid USING GIST(geometry);
+CREATE INDEX volta_grid_cell_idx ON volta_grid(cell_id);
+
+CREATE TABLE volta_allocation (
+    id SERIAL PRIMARY KEY,
+    cell_id INTEGER UNIQUE REFERENCES volta_grid(cell_id) ON DELETE CASCADE,
+    geometry Geometry(Polygon, 2136) NOT NULL,
+    allocation INTEGER NOT NULL CHECK (allocation IN (0, 1, 2)),
+    confidence FLOAT CHECK (confidence >= 0 AND confidence <= 1),
+    uncertainty_flags INTEGER DEFAULT 0,
+    economic_value_cfa FLOAT,
+    flood_probability FLOAT,
+    road_cost_km FLOAT,
+    seasonal_suitable_dekads INTEGER,
+    updated_at TIMESTAMP DEFAULT now()
+);
+
+CREATE INDEX volta_allocation_geom_idx ON volta_allocation USING GIST(geometry);
+CREATE INDEX volta_allocation_cell_idx ON volta_allocation(cell_id);
+CREATE INDEX volta_allocation_type_idx ON volta_allocation(allocation);
