@@ -47,14 +47,15 @@ CREATE INDEX ghana_allocation_type_idx ON ghana_allocation(allocation);
 
 -- ============================================================
 -- Volta Region tables (1km x 1km resolution)
--- Bounding box derived from geoBoundaries Ghana ADM1 "Volta Region"
+-- Coordinates in EPSG:4326 (WGS84 lat/lon)
+-- Bounding box: west=0.0917, east=1.2003, south=5.7665, north=7.3047
 -- ============================================================
 
 CREATE TABLE volta_grid (
     id SERIAL PRIMARY KEY,
     cell_id INTEGER UNIQUE NOT NULL,
-    geometry Geometry(Polygon, 2136) NOT NULL,
-    centroid Geometry(Point, 2136),
+    geometry Geometry(Polygon, 4326) NOT NULL,
+    centroid Geometry(Point, 4326),
     twi FLOAT,
     sca_ha FLOAT,
     elevation_mean FLOAT,
@@ -68,7 +69,7 @@ CREATE INDEX volta_grid_cell_idx ON volta_grid(cell_id);
 CREATE TABLE volta_allocation (
     id SERIAL PRIMARY KEY,
     cell_id INTEGER UNIQUE REFERENCES volta_grid(cell_id) ON DELETE CASCADE,
-    geometry Geometry(Polygon, 2136) NOT NULL,
+    geometry Geometry(Polygon, 4326) NOT NULL,
     allocation INTEGER NOT NULL CHECK (allocation IN (0, 1, 2)),
     confidence FLOAT CHECK (confidence >= 0 AND confidence <= 1),
     uncertainty_flags INTEGER DEFAULT 0,

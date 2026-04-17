@@ -9,9 +9,9 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-from flask.optimization.volta_data_layers import VoltaDataLayerLoader
-from flask.optimization.sa_engine import run_sa, run_multi_chain
-from flask.optimization.write_to_postgis_volta import write_volta_allocation_to_postgis
+from optimization.volta_data_layers import VoltaDataLayerLoader
+from optimization.sa_engine import run_sa, run_multi_chain
+from optimization.write_to_postgis_volta import write_volta_allocation_to_postgis
 
 logging.basicConfig(
     level=logging.INFO,
@@ -38,7 +38,7 @@ def compute_validation_metrics(state, data: VoltaDataLayerLoader) -> dict:
 
 
 def run_nightly_optimization_volta(
-    data_dir: Path = Path("flask/optimization/data/mock"),
+    data_dir: Path = Path("optimization/data/mock"),
     n_chains: int = 4,
     n_iterations: int = None,
 ) -> tuple:

@@ -1,16 +1,20 @@
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent))
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
 import rasterio
 import numpy as np
-from pathlib import Path
 import subprocess
 import os
 from datetime import datetime
 from typing import Dict, Any, List, Tuple
 import anthropic
 
-from flask.optimization.api_volta import volta_bp
+from optimization.api_volta import volta_bp
 
 app = Flask(__name__)
 CORS(app)

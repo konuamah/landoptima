@@ -1,14 +1,23 @@
 import os
 import psycopg2
 from contextlib import contextmanager
+from urllib.parse import urlparse
 
-DB_CONFIG = {
-    "host": os.environ.get("DB_HOST", "localhost"),
-    "port": os.environ.get("DB_PORT", "5432"),
-    "database": os.environ.get("DB_NAME", "landoptima"),
-    "user": os.environ.get("DB_USER", "landoptima"),
-    "password": os.environ.get("DB_PASSWORD", "landoptima"),
-}
+
+def get_db_config_from_url(url: str = None) -> dict:
+    if url is None:
+        url = os.environ.get("DATABASE_URL", "")
+    parsed = urlparse(url)
+    return {
+        "host": parsed.hostname or "localhost",
+        "port": parsed.port or 5432,
+        "database": parsed.path.lstrip("/") or "landoptima",
+        "user": parsed.username or "landoptima",
+        "password": parsed.password or "landoptima",
+    }
+
+
+DB_CONFIG = get_db_config_from_url()
 
 
 @contextmanager

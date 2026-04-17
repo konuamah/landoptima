@@ -9,8 +9,8 @@ from typing import Dict
 
 import numpy as np
 
-from flask.db import get_db_connection
-from flask.optimization.volta_data_layers import VoltaDataLayerLoader, VOLTA_EXTENT
+from db import get_db_connection
+from optimization.volta_data_layers import VoltaDataLayerLoader, VOLTA_EXTENT
 
 logger = logging.getLogger(__name__)
 
@@ -32,13 +32,14 @@ def write_volta_allocation_to_postgis(
         for cell in range(state.n_cells):
             row, col = data.cell_id_to_index(cell + 1)
             alloc = int(state.allocations[cell])
-            economic_value = data.basevalue[cell, alloc] if cell < len(data.basevalue) else 0.0
-            flood_p = data.flood_probability[cell] if cell < len(data.flood_probability) else 0.0
-            road_cost = data.road_cost[cell] if cell < len(data.road_cost) else 0.0
+            economic_value = float(data.basevalue[cell, alloc]) if cell < len(data.basevalue) else 0.0
+            flood_p = float(data.flood_probability[cell]) if cell < len(data.flood_probability) else 0.0
+            road_cost = float(data.road_cost[cell]) if cell < len(data.road_cost) else 0.0
             suitable_dekads = int(data.seasonal_masks["mid"][:, cell].sum()) if cell < data.seasonal_masks["mid"].shape[1] else 0
             
             cur.execute("""
-                SELECT geometry FROM volta_grid 
+                SELECT ST_AsText(geometry)
+                FROM volta_grid 
                 WHERE cell_id = %s
             """, (cell + 1,))
             geom_row = cur.fetchone()
@@ -50,7 +51,7 @@ def write_volta_allocation_to_postgis(
                 INSERT INTO volta_allocation 
                 (cell_id, geometry, allocation, confidence, uncertainty_flags,
                  economic_value_cfa, flood_probability, road_cost_km, seasonal_suitable_dekads, updated_at)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, now())
+                VALUES (%s, ST_GeomFromText(%s, 4326), %s, %s, %s, %s, %s, %s, %s, now())
                 ON CONFLICT (cell_id) DO UPDATE SET
                   allocation = EXCLUDED.allocation,
                   confidence = EXCLUDED.confidence,

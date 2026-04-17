@@ -17,7 +17,7 @@ import rasterio
 import psycopg2
 import pandas as pd
 
-from flask.optimization.data_layers import DataLayerLoader as GhanaDataLayerLoader
+from optimization.data_layers import DataLayerLoader as GhanaDataLayerLoader
 
 VOLTA_EXTENT = {"west": 0.0917, "east": 1.2003, "south": 5.7665, "north": 7.3047}
 CELL_SIZE_DEG = 0.00833
@@ -38,7 +38,7 @@ DATABASE_URL = os.environ.get(
 
 
 class VoltaDataLayerLoader:
-    def __init__(self, data_dir: Union[str, Path] = "flask/optimization/data/mock"):
+    def __init__(self, data_dir: Union[str, Path] = "optimization/data/mock"):
         self.data_dir = Path(data_dir)
         self._basevalue = None
         self._seasonal_masks = None

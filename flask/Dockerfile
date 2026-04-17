@@ -23,7 +23,7 @@ RUN pip install --upgrade pip setuptools wheel
 RUN pip install --only-binary=:all: rasterio numpy
 
 # Install remaining packages
-RUN pip install --no-cache-dir Flask==2.3.2 Flask-CORS==4.0.0 whitebox==2.2.0 requests==2.31.0 anthropic python-dotenv==1.0.0 pathlib datetime psycopg2-binary
+RUN pip install --no-cache-dir Flask==2.3.2 Flask-CORS==4.0.0 whitebox==2.2.0 requests==2.31.0 anthropic python-dotenv==1.0.0 pathlib datetime psycopg2-binary pandas
 
 # Copy the Flask application code and requirements.txt file into the container
 COPY app.py requirements.txt /app/

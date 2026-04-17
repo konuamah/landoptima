@@ -14,7 +14,7 @@ import logging
 from pathlib import Path
 
 from flask import Blueprint, request, jsonify
-from flask.db import get_db_connection
+from db import get_db_connection
 import psycopg2.extras
 
 logger = logging.getLogger(__name__)
@@ -155,7 +155,7 @@ def internal_run_optimization_volta():
     Trigger Volta SA optimization (admin/internal only).
     Runs the nightly optimization and writes results to PostGIS.
     """
-    from flask.optimization.nightly_runner_volta import run_nightly_optimization_volta
+    from optimization.nightly_runner_volta import run_nightly_optimization_volta
     from pathlib import Path
     
     data_dir = request.json.get("data_dir") if request.is_json else None
